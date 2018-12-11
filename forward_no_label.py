@@ -1,4 +1,11 @@
 
+def check_branch(register_list,ins):
+    '''
+    A function that determine if the branch is taken
+    '''  
+    #TODO
+    return False
+
 def get_label_num():
     '''
     A function that get number of label
@@ -48,7 +55,7 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
         
 def print_register(register_list): 
     '''
-    A function that  do the print register
+    A function that do the print register
     '''
     print("$s0 = {:<14d}$s1 = {:<14d}$s2 = {:<14d}$s3 = {:<14d}".\
           format(register_list[0],register_list[1],register_list[2],register_list[3]))
@@ -126,16 +133,51 @@ def forward_with_one_label():
     print("START OF SIMULATION (forwarding)")
     #start with cycle 1    
     cycle_num = 1 
-    
     #main loop
     while ((cycle_num < 16) and (finished_ins != ins_num)): 
         for j in range(ins_num): 
-            if((cycle_num - j) >= 0)and((cycle_num - j) <= 5 and (j < label_from) ):
-            # for the instruction before label
-                cycle[j][cycle_num - 1] = cycle_num - j 
-                if(cycle_num - j == 5): #WB finished this ins 
-                    finished_ins += 1
-                    register_list = get_register(register_list) #get register updated
+            if(cycle_num < (label_from + 4)) :
+                # for the instruction before label
+                if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                    cycle[j][cycle_num - 1] = cycle_num - j 
+                    if(cycle_num - j == 5): #WB finished this ins 
+                        finished_ins += 1
+                        register_list = get_register(register_list) #get register updated
+            elif(cycle_num == label_from + 4): 
+                taken = check_branch(register_list,ins_num[j])
+                if taken:#if branch is taken
+                    if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                        cycle[j][cycle_num - 1] = cycle_num - j 
+                        if(cycle_num - j == 5): #WB finished this ins 
+                            finished_ins += 1
+                            register_list = get_register(register_list) #get register updated
+                else:#if branch is not taken
+                    if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                        if(cycle_num - j == 5):
+                            cycle[j][cycle_num - 1] = 5
+                            finished_ins += 1
+                            register_list = get_register(register_list)
+                        elif(cycle_num - j == 1):
+                            cycle[j][cycle_num - 1] = 1
+                        else:
+                            cycle[j][cycle_num - 1] = -1
+            elif(cycle_num>label_from + 4)and(not taken):
+                #todo.....
+                continue
+                
+                
+                
+                
+                    
+                    
+                    
+                        
+                    
+                    
+                    
+                
+                
+                
     
                 
                     
