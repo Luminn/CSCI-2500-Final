@@ -10,6 +10,7 @@ re_invalid_var_num = re.compile(r"\$\d")
 
 VALID_COMMANDS = {"add", "addi", "and", "andi", "or", "ori", "slt", "slti", "beq", "bne"}
 
+
 class MipsError(BaseException):
     pass
 
@@ -48,8 +49,8 @@ def parse_file(file_name):
 def jump_ref(parsed_data):
     ref_table = {}
     for i, v in enumerate(parsed_data):
-        if parsed_data[1] is not None:
-            ref_table[v] = i
+        if v[1] is not None:
+            ref_table[v[1]] = i
     return ref_table
 
 
@@ -58,3 +59,7 @@ def validate(commands):
         if i not in VALID_COMMANDS:
             return False
     return True
+
+
+def is_var(item):
+    return item[0].isalpha()
