@@ -24,9 +24,9 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
             elif(cycle[line_num][ins_place] == 5): 
                 line += "WB  " 
             elif(cycle[line_num][ins_place] == 6): 
-                line += "  *" 
+                line += "*   " 
             else: 
-                line+= " ???" 
+                line+= "????" 
             ins_place += 1 
         print(line)
         line_num += 1 
