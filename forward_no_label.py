@@ -3,7 +3,29 @@ def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
     '''  
-    #TODO
+
+    #ins="bne $s1,$ZERO,gg"
+    #{s0 s1 s2 s3 s4 s5 s6 s7 t0 t1 t2}
+
+
+    branchType = ""
+
+    temp=ins.split()
+    if(temp.length()<2):
+        pass
+    else:
+        branchType=temp[0]
+        temp=temp.split(',')
+    #     temp=["$s1","$t2","gg"]
+        a=register_list[temp[0]]
+        b=register_list[temp[1]]
+        if branchType == "beq":
+            return a==b
+        elif branchType == "bne":
+            return a!=b
+
+
+
     return False
 
 def get_label_num():
@@ -125,6 +147,9 @@ def forward_with_one_label():
     cycle = [] #main double list
     finished_ins = 0 #num of finished ins
     register_list = [0]*18
+    register_dict = {"$s0":0,"$s1":0,"$s2":0,"$s3":0,"$s4":0,"$s5":0,"$s6":0,"$s7":0,"$t0":0,
+                     "$t1": 0,"$t2":0,"$t3":0,"$t4":0,"$t5":0,"$t6":0,"$t7":0,"$t8":0,"$t9":0
+                     }
     label_from,label_to=label_position()
     #build the main double list
     for i in range(16): 
