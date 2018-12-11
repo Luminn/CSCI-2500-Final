@@ -1,8 +1,19 @@
+"""
+
+This module provides the functions of a simple MIPS interpreter, allowing the user to execute mips instructions and
+store register values.
+
+"""
+
+
 class menv:
+    """MIPS environment, representing all mips registers"""
+
     def __init__(self):
         self.vars = {**{"s{}".format(i): 0 for i in range(8)}, **{"t{}".format(i): 0 for i in range(10)}}
 
     def __getitem__(self, item):
+        """dict styled access to the mips registers"""
         if item == "zero":
             return 0
         if item not in self.vars:
@@ -10,6 +21,7 @@ class menv:
         return self.vars[item]
 
     def __setitem__(self, key, value):
+        """dict styled access to the mips registers"""
         if not isinstance(value, int):
             raise ValueError
         if key not in self.vars:
@@ -17,6 +29,7 @@ class menv:
         self.vars[key] = value
 
     def __str__(self):
+        """Convert the data into output"""
         result = ""
         line_count = 0
         for i in self.vars:
@@ -27,6 +40,7 @@ class menv:
 
 
 def apply_instruction(inst, env):
+    """Apply a formatted mips instruction to a MIPS environment."""
     if inst[0] == "add":
         env[inst[1]] = env[inst[2]] + env[inst[3]]
     elif inst[0] == "addi":
