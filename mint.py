@@ -1,10 +1,10 @@
-
-
 class menv:
     def __init__(self):
         self.vars = {**{"s{}".format(i): 0 for i in range(8)}, **{"t{}".format(i): 0 for i in range(10)}}
 
     def __getitem__(self, item):
+        if item == "zero":
+            return 0
         if item not in self.vars:
             raise KeyError
         return self.vars[item]
@@ -43,6 +43,3 @@ def apply_instruction(inst, env):
         env[inst[1]] = env[inst[2]] << env[inst[3]]
     elif inst[0] == "slti":
         env[inst[1]] = env[inst[2]] << int(inst[3])
-
-m = menv()
-
