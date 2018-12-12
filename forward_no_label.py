@@ -1,4 +1,4 @@
-
+import input
 def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
@@ -55,10 +55,9 @@ def get_label_num():
 def label_position():
     '''
     A function that get label position
-    '''   
-    label_from = 1
-    label_to = 4
-    return (label_from,label_to)
+    '''
+    a=input.jump_ref(input.parse_file(argv[2]))
+    return (a[0],a[1])
 
 def print_cycle(cycle, cycle_num, ins_num, ins_list): 
     '''
@@ -110,9 +109,14 @@ def get_ins():
     '''
     A function that get all the instrction, and store in a list
     '''
-    #TODO
-    ins_list = ["$s1,$zero,451", "$t2,$s0,73", "$t4,$s3,$s7"] 
-    return ins_list 
+    # TODO
+
+    ins_list = input.parse_file(argv[2])
+
+    for x in range(ins_list):
+        x = input.instruction_to_string(x)
+
+    return ins_list
 
 def get_register(register_list):    
     '''
