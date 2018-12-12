@@ -1,6 +1,8 @@
 import input
 import sys
 import mint
+from no_forward import no_forward
+
 def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
@@ -283,10 +285,16 @@ def forward_with_one_label():
     print("END OF SIMULATION")
         
 if __name__ == "__main__":
-    label_num = get_label_num()
-    if label_num == 0:
-        forward_no_label()
-    elif label_num == 1:
-        forward_with_one_label()
+    argv=sys.argv
+    if argv[1]=="F":
+        label_num = get_label_num()
+        if label_num == 0:
+            forward_no_label()
+        elif label_num == 1:
+            forward_with_one_label()
+        else:
+            print("got fvcked")
     else:
-        print("got fvcked")
+        filename = str(argv[2]) 
+        _list= input.parse_file(argv[2])[0]
+        no_forward(filename, _list)
