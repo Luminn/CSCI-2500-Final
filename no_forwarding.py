@@ -21,18 +21,17 @@ def execute(j):
     pass
 
 
-
-def print_cycle(cycle, cycle_num, num_inst): 
+def noforwarding_print_cycle(cycle, cycle_num, ins_num, ins_list): 
     '''
     A function that do the print cycle
     '''
-    print("----------------------------------------------------------------------------------")
+    print("-"*82)
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
-    line_num = 0 
-    while((line_num < num_inst)): 
-        ins_place = 0 
-        
-        line = "\t\t    "
+    line_num = 0 #row num of cycle
+    while((line_num < cycle_num) and (line_num < ins_num)): 
+        ins_place = 0 #column num of cycle
+        #print(len(ins_list),line_num)
+        line = ins_list[line_num] + " " * (20 - len(ins_list[line_num]))
         while (ins_place < 16): 
             if(cycle[line_num][ins_place] == 0): 
                 line += ".   " 
@@ -47,10 +46,24 @@ def print_cycle(cycle, cycle_num, num_inst):
             elif(cycle[line_num][ins_place] == 5): 
                 line += "WB  " 
             elif(cycle[line_num][ins_place] == -1): 
-                line += "  *" 
-            ins_place += 1 
-        print(line)
-        line_num += 1 
+                line += "*   " 
+            else: 
+                line+= "????" 
+            ins_place += 1 #increrment for column
+        
+        line_num += 1 #increrment for row
+        print(line.rstrip())
+
+
+def read_file(filename):
+    f = open(filename, "r")
+    content = f.read()
+    content = content.split("\n")
+    return content
+
+
+
+
 
 
 
@@ -66,7 +79,9 @@ def print_cycle(cycle, cycle_num, num_inst):
 # f_l is a list containing the first regrister e.g. [5, 3, 4, ...] t = +0, s = +10
 # s_l is a list containing the second and third regrister e.g. [[1, 2], [3, -1]] t = +0, s = +10, $zero or immediate value = -1
 
-def no_forward(_list):
+def no_forward(filename, _list):
+
+    origin_data = read_file(filename)
 
     num_inst = len(_list)
     #create a total_list(num_inst * 16)
@@ -141,7 +156,7 @@ def no_forward(_list):
             t = total_list[temp].index(1)
             total_list[i_f][t+real_nop[i_f-1]+5] = 5
 
-        print(real_nop)
+        #print(real_nop)
 
         #WB
         #if empty, fill in
@@ -235,11 +250,10 @@ def no_forward(_list):
                 j+=1
 '''
 
-
+        #print(origin_data[0])
         
-        
 
-        print_cycle(total_list, i, num_inst)
+        noforwarding_print_cycle(total_list, i, num_inst, origin_data)
 
                 
         #determine end of instruction
@@ -275,4 +289,4 @@ def no_forward(_list):
 
 #no_forward([["add", "s1", "s0", "s0"], ["add", "t2", "s0", "s5"], ["addi", "t4", "s3", "70"]])
 
-no_forward([["ori", "s1", "s0", "63"], ["ori", "s2", "s0", "65"], ["and", "t2", "s1", "s2"], ["addi", "$s1", "s1", "1"]])
+#no_forward("p1-input01.txt", [["ori", "s1", "s0", "63"], ["ori", "s2", "s0", "65"], ["and", "t2", "s1", "s2"], ["addi", "$s1", "s1", "1"]])
