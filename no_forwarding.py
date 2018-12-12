@@ -22,17 +22,20 @@ def execute(j):
 
 
 
-def print_cycle(cycle, cycle_num): 
+
+
+def print_cycle(cycle, cycle_num, ins_num, ins_list): 
     '''
     A function that do the print cycle
     '''
-    print("----------------------------------------------------------------------------------")
+    #print(cycle)
+    print("-"*82)
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
-    line_num = 0 
-    while((line_num < 4)): 
-        ins_place = 0 
-        
-        line = "\t\t    "
+    line_num = 0 #row num of cycle
+    while((line_num < cycle_num+1) and (line_num < ins_num)): 
+        ins_place = 0 #column num of cycle
+        #print(len(ins_list),line_num)
+        line = ins_list[line_num] + " " * (20 - len(ins_list[line_num]))
         while (ins_place < 16): 
             if(cycle[line_num][ins_place] == 0): 
                 line += ".   " 
@@ -47,10 +50,20 @@ def print_cycle(cycle, cycle_num):
             elif(cycle[line_num][ins_place] == 5): 
                 line += "WB  " 
             elif(cycle[line_num][ins_place] == -1): 
-                line += "  *" 
-            ins_place += 1 
-        print(line)
-        line_num += 1 
+                line += "*   " 
+            else: 
+                line+= "????" 
+            ins_place += 1 #increrment for column
+        
+        line_num += 1 #increrment for row
+        print(line.rstrip())
+    print()
+
+def readdata(filename):
+    f = open(filename, "r")
+    content = f.read()
+    data = content.split("\n")
+    return data
 
 
 
@@ -66,8 +79,9 @@ def print_cycle(cycle, cycle_num):
 # f_l is a list containing the first regrister e.g. [5, 3, 4, ...] t = +0, s = +10
 # s_l is a list containing the second and third regrister e.g. [[1, 2], [3, -1]] t = +0, s = +10, $zero or immediate value = -1
 
-def no_forward(_list):
+def no_forward(filename, _list):
 
+    original_data = readdata(filename)
     num_inst = len(_list)
     #create a total_list(num_inst * 16)
     i = 0
@@ -107,6 +121,7 @@ def no_forward(_list):
                     nop[k] = k - j
     
     temp = 0
+    i_f = 0
 
     #fill in the instruction as the program run
     i = 0
@@ -124,13 +139,29 @@ def no_forward(_list):
             t = total_list[temp].index(1)
             total_list[temp][t+real_nop[temp]+4] = 5
 
+        if (i_f!=0 and i - i_f == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+1] = 2
+
+        if (i_f!=0 and i - i_f == 3):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+2] = 3
+
+        if (i_f!=0 and i - i_f == 4):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+3] = 4
+
+        if (i_f!=0 and i - i_f == 5):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+4] = 5
+        
+
         #WB
         #if empty, fill in
         #else, find the next empty place.
         #if (i>=4 and len(real_nop) > i-3 and real_nop[i-4] == 0):
         if i >= 4 and i<num_inst+4 and total_list[i-4][i] == 0:
             total_list[i-4][i] = 5
-
             '''
         elif i >= 4 and i < num_inst+4:
             j = i
@@ -177,12 +208,13 @@ def no_forward(_list):
                 if total_list[i-2][j] == 0:
                     total_list[i-2][j] = 3
                     break
-                j+=1
-'''
-
+                j+=1    
+                '''    
         #if ID block(in the previous instruction), print IF
-        if i>=1 and i<num_inst+1 and total_list[i-1][i] == 0 and total_list[i-2][i] == 1:
+        if i>=1 and i<num_inst+1 and total_list[i-1][i] == 0 and total_list[i-2][i] == 2:
             total_list[i-1][i] = 1
+            print(i_f)
+            i_f = i - 1
 
         #ID
         #if empty, fill in
@@ -215,12 +247,10 @@ def no_forward(_list):
                 j+=1
 '''
 
-
         
         
 
-        print_cycle(total_list, i)
-
+        print_cycle(total_list, i, num_inst,original_data)
                 
         #determine end of instruction
         j = 0
@@ -246,13 +276,3 @@ def no_forward(_list):
 
 
     return total_list
-
-
-
-#no_forward([["ori", "s1", "zero", "451"], ["addi", "t2", "s0", "73"], ["add", "t4", "s1", "s7"]])
-#==>
-#no_forward([["ori", "s1", "zero", "451"], ["addi", "t2", "s0", "73"], ["add", "t4", "s3", "s7"]])
-
-#no_forward([["add", "s1", "s0", "s0"], ["add", "t2", "s0", "s5"], ["addi", "t4", "s3", "70"]])
-
-no_forward([["ori", "s1", "s0", "63"], ["ori", "s2", "s0", "65"], ["and", "t2", "s1", "s2"], ["addi", "$s1", "s1", "1"]])
