@@ -53,7 +53,3 @@ def apply_instruction(inst, env):
         env[inst[1]] = env[inst[2]] | env[inst[3]]
     elif inst[0] == "ori":
         env[inst[1]] = env[inst[2]] | int(inst[3])
-    elif inst[0] == "slt":
-        env[inst[1]] = env[inst[2]] << env[inst[3]]
-    elif inst[0] == "slti":
-        env[inst[1]] = env[inst[2]] << int(inst[3])
