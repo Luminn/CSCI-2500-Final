@@ -90,21 +90,27 @@ def print_register(register_list):
     A function that do the print register
     '''
     print(register_list)
-    
+
+
 def get_ins():
     '''
     A function that get all the instrction, and store in a list
     '''
-
-    ins_list,tran_dict = input.parse_file("test.txt")
+    argv = sys.argv
+    ins_list, tran_dict = input.parse_file(argv[2])
+    jump_ins = []
     for x in range(len(ins_list)):
-        if(ins_list[x][0] == "bne") or (ins_list[x][0] == "beq" ):
-            ins_list[x][3]= tran_dict[int(ins_list[x][3])]
-    
-    res=[]
-    
+        if (ins_list[x][0] == "bne") or (ins_list[x][0] == "beq"):
+            ins_list[x][3] = tran_dict[int(ins_list[x][3])].strip("$")
+            jump_ins.append(x)
+
+    res = []
+
     for x in ins_list:
-        res.append(input.instruction_to_string(x))
+        if ins_list.index(x) in jump_ins:
+            res.append(x[0]+" $"+x[1]+",$"+x[2]+","+x[3])
+        else:
+            res.append(input.instruction_to_string(x))
     return res
 
 def get_register(register_list,ins):    
