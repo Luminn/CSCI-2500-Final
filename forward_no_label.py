@@ -1,3 +1,4 @@
+import input
 
 def check_branch(register_list,ins):
     '''
@@ -45,6 +46,19 @@ def check_branch(register_list,ins):
 
     return False
 
+def get_ins():
+    '''
+    A function that get all the instrction, and store in a list
+    '''
+    # TODO
+
+    ins_list = input.parse_file()
+
+    for x in range(ins_list):
+        x = input.instruction_to_string(x)
+
+    return ins_list
+
 def get_label_num():
     '''
     A function that get number of label
@@ -56,9 +70,9 @@ def label_position():
     '''
     A function that get label position
     '''   
-    label_from = 2
-    label_to = 5
-    return (label_from,label_to)
+    res=input.jump_ref()
+
+    return res
 
 def print_cycle(cycle, cycle_num, ins_num, ins_list): 
     '''
@@ -105,14 +119,9 @@ def print_register(register_list):
     print("$t4 = {:<14d}$t5 = {:<14d}$t6 = {:<14d}$t7 = {}".\
           format(register_list[12],register_list[13],register_list[14],register_list[15]))
     print("$t8 = {:<14d}$t9 = {:<14d}".format(register_list[16],register_list[17]))
-    
-def get_ins():
-    '''
-    A function that get all the instrction, and store in a list
-    '''
-    #TODO
-    ins_list = ["$s1,$zero,451", "$t2,$s0,73", "beq $t4,$s3,gg"]
-    return ins_list 
+
+
+
 
 def get_register(register_list):    
     '''
