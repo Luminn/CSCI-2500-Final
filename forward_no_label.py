@@ -66,7 +66,7 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
     line_num = 0 #row num of cycle
     while((line_num < cycle_num) and (line_num < ins_num)): 
         ins_place = 0 #column num of cycle
-        print(len(ins_list),line_num)
+        #print(len(ins_list),line_num)
         line = ins_list[line_num] + " " * (20 - len(ins_list[line_num]))
         while (ins_place < 16): 
             if(cycle[line_num][ins_place] == 0): 
@@ -88,7 +88,7 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
             ins_place += 1 #increrment for column
         
         line_num += 1 #increrment for row
-        print(line)
+        print(line.rstrip())
         
 def print_register(register_list): 
     '''
@@ -107,6 +107,7 @@ def get_ins():
     
     for x in ins_list:
         res.append(input.instruction_to_string(x))
+    #print(res)
     return res
 
 def get_register(register_list,ins):    
@@ -114,8 +115,6 @@ def get_register(register_list,ins):
     A function that update the register, and store in a list
     '''
     #TODO
-    print("??????????????????????????????????")
-    print(ins)
     mint.apply_instruction(ins,register_list)
 
 
@@ -181,7 +180,7 @@ def forward_with_one_label():
     #start with cycle 1    
     cycle_num = 1 
     #main loop
-    while ((cycle_num < 16) and (finished_ins != ins_num)): 
+    while ((cycle_num <= 16) and (finished_ins != ins_num)): 
         if(cycle_num < (label_to + 5)) :
             for j in range(ins_num):
                 # for the instruction before label
@@ -201,13 +200,13 @@ def forward_with_one_label():
                             finished_ins += 1
                             get_register(register_list,instruction_split(ins_list[j])) #get register updated
             else:#if branch is taken
-                ins_num += label_to - label_from
                 insert_index = label_from
                 insert_to_index = cycle_num - 1
-                while insert_index <= label_to:
+                while insert_index <= ins_num:
                     ins_list.insert(insert_to_index,ins_list[insert_index])
                     insert_index += 1
                     insert_to_index +=1
+                ins_num += (ins_num - label_from)
                 for j in range(ins_num):
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                         if(cycle_num - j == 5):
@@ -229,22 +228,49 @@ def forward_with_one_label():
                     if(cycle_num - j == 5): #WB finished this ins 
                         finished_ins += 1
                         get_register(register_list,instruction_split(ins_list[j])) #get register updated
-        elif(cycle_num > label_from + 5)and(taken):
-            #if branch is taken
-            for j in range(ins_num):
-                if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
-                    if cycle[j][cycle_num - 2] == -1:
-                        cycle[j][cycle_num - 1] = -1
-                        #print("???????????????????????")
-                        #print("cycle[{}][{}]={}".format(j,(cycle_num - 1),-1))
-                    else:
-                        cycle[j][cycle_num - 1] = cycle_num - j
-                        #print("???????????????????????")
-                        #print("cycle[{}][{}]={}".format(j,(cycle_num - 1),cycle_num - j))
-                        if(cycle_num - j == 5): #WB finished this ins 
-                            finished_ins += 1
-                            get_register(register_list,instruction_split(ins_list[j])) #get register updated
-                
+        elif(cycle_num > label_to + 5)and(taken):
+            if(cycle_num == label_to + 5 + 4 + label_to - label_from): 
+                #taken = check_branch(register_list,ins_list[label_to])
+                taken = True                
+                if not taken:#if branch is not taken
+                    for j in range(ins_num):
+                        if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                            cycle[j][cycle_num - 1] = cycle_num - j 
+                            if(cycle_num - j == 5): #WB finished this ins 
+                                finished_ins += 1
+                                get_register(register_list,instruction_split(ins_list[j])) #get register updated
+                else:#if branch is taken
+                    insert_index = label_from
+                    insert_to_index = cycle_num - 1
+                    while insert_index <= ins_num:
+                        ins_list.insert(insert_to_index,ins_list[insert_index])
+                        insert_index += 1
+                        insert_to_index +=1
+                    ins_num += (ins_num - label_from)
+                    for j in range(min(16,ins_num)):
+                        if((cycle_num - j) >= 0)and((cycle_num - j) <= 5 and (cycle_num<=16)):
+                            if(cycle_num - j == 5):
+                                cycle[j][cycle_num - 1] = 5
+                                finished_ins += 1
+                                get_register(register_list,ins_list[j])
+                            elif(cycle_num - j == 1):
+                                cycle[j][cycle_num - 1] = 1
+                            elif(cycle_num - j == 0):
+                                cycle[j][cycle_num - 1] = 0                        
+                            else:
+                                cycle[j][cycle_num - 1] = -1            
+            else:
+                #if branch is taken
+                for j in range(ins_num):
+                    if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                        if cycle[j][cycle_num - 2] == -1:
+                            cycle[j][cycle_num - 1] = -1
+                        else:
+                            cycle[j][cycle_num - 1] = cycle_num - j
+                            if(cycle_num - j == 5): #WB finished this ins 
+                                finished_ins += 1
+                                get_register(register_list,instruction_split(ins_list[j])) #get register updated
+                    
                         
                                      
         print_cycle(cycle, cycle_num, ins_num, ins_list) #print cycle
