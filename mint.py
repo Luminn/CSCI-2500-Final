@@ -14,6 +14,10 @@ class menv:
 
     def __getitem__(self, item):
         """dict styled access to the mips registers"""
+        try:
+            return int(item)
+        except ValueError:
+            pass
         if item == "zero":
             return 0
         if item not in self.vars:
@@ -36,7 +40,7 @@ class menv:
             line_count += 1
             temp = "${} = {}".format(i, self.vars[i])
             result += temp + (" " * (20 - len(temp)) if line_count % 4 != 0 else "\n")
-        return result
+        return result.rstrip()
 
 
 def apply_instruction(inst, env):

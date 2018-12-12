@@ -12,7 +12,7 @@ single_instruction = re.compile(r"^\s*([a-z]+)\s*$")
 re_label = re.compile(r"^\s*([A-Za-z]\w+)\s*:(.*)")
 re_standard = re.compile(r"\s*([a-z]+)\s*\$([a-z]\d)\s*,\s*\$([a-z]\d|zero)\s*,\s*\$?([a-z]\d|-?\d+|zero)")
 re_load_save = re.compile(r"\s*([a-z]+)\s*\$([a-z]\d)\s*,\s*(-?\d+)\s*\(\s*\$([a-z]\d|zero)\s*\)")
-re_branch = re.compile(r"\s*([a-z]+)\s*\$([a-z]\d|zero)\s*,\s*[|$]([a-z]\d|-?\d+|zero)\s*,\s*([A-Za-z]\w+)")
+re_branch = re.compile(r"\s*([a-z]+)\s*\$?([a-z]\d|-?\d+|zero)\s*,\s*\$?([a-z]\d|-?\d+|zero)\s*,\s*([A-Za-z]\w*)")
 re_invalid_var_num = re.compile(r"\$\d")
 
 """Commands supported by this project."""
@@ -64,6 +64,15 @@ def jump_ref(parsed_data):
     return ref_table
 
 
+def translation_dict(parsed_data):
+    """Returns a reference table of labels and their location in the list."""
+    ref_table = {}
+    for i, v in enumerate(parsed_data):
+        if v[1] is not None:
+            ref_table[i] = v[1]
+    return ref_table
+
+
 def parse_file(file_name):
     """Parse a file containing mips code."""
     result1 = []
@@ -88,26 +97,8 @@ def parse_file(file_name):
             result.append([v[0][0], v[0][1], v[0][2], str(refs[v[0][3]])])
         else:
             result.append(v[0])
-    return result
-
-
-def raw_parse_file(file_name):
-    """Parse a file containing mips code."""
-    result1 = []
-    with open(file_name, "r") as file:
-        data = file.read()
-    last_label = None
-    for line in data.split('\n'):
-        line_data = parse_line(line)
-        # remove lines containing only a label and apply the label to subsequent lines.
-        if line_data[0] is not None:
-            if line_data[1] is None and last_label is not None:
-                line_data = line_data[0], last_label
-            result1.append(line_data)
-            last_label = None
-        elif line_data[0] is None and line_data[1] is not None:
-            last_label = line_data[1]
-    return result1
+    translation = translation_dict(result1)
+    return result, translation
 
 
 def is_var(item):
