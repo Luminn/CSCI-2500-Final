@@ -22,14 +22,14 @@ def execute(j):
 
 
 
-def print_cycle(cycle, cycle_num): 
+def print_cycle(cycle, cycle_num, num_inst): 
     '''
     A function that do the print cycle
     '''
     print("----------------------------------------------------------------------------------")
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
     line_num = 0 
-    while((line_num < 4)): 
+    while((line_num < num_inst)): 
         ins_place = 0 
         
         line = "\t\t    "
@@ -107,6 +107,7 @@ def no_forward(_list):
                     nop[k] = k - j
     
     temp = 0
+    i_f = 0
 
     #fill in the instruction as the program run
     i = 0
@@ -122,7 +123,25 @@ def no_forward(_list):
 
         if (temp!=0 and i - temp == 5):
             t = total_list[temp].index(1)
-            total_list[temp][t+real_nop[temp]+4] = 5
+            total_list[temp][t+real_nop[temp-1]+4] = 5
+
+        if (i_f!=0 and i - i_f == 2):
+            t = total_list[temp].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+2] = 2
+
+        if (i_f!=0 and i - i_f == 3):
+            t = total_list[temp].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+3] = 3
+
+        if (i_f!=0 and i - i_f == 4):
+            t = total_list[temp].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+4] = 4
+
+        if (i_f!=0 and i - i_f == 5):
+            t = total_list[temp].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+5] = 5
+
+        print(real_nop)
 
         #WB
         #if empty, fill in
@@ -181,8 +200,9 @@ def no_forward(_list):
 '''
 
         #if ID block(in the previous instruction), print IF
-        if i>=1 and i<num_inst+1 and total_list[i-1][i] == 0 and total_list[i-2][i] == 1:
+        if i>=1 and i<num_inst+1 and total_list[i-1][i] == 0 and total_list[i-2][i] == 2:
             total_list[i-1][i] = 1
+            i_f = i - 1
 
         #ID
         #if empty, fill in
@@ -219,7 +239,7 @@ def no_forward(_list):
         
         
 
-        print_cycle(total_list, i)
+        print_cycle(total_list, i, num_inst)
 
                 
         #determine end of instruction
