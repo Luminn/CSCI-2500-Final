@@ -6,8 +6,6 @@ def check_branch(register_list,ins):
     A function that determine if the branch is taken
     '''  
 
-    #ins="bne $s1,$ZERO,gg"
-    #{s0 s1 s2 s3 s4 s5 s6 s7 t0 t1 t2}
     branchType = ""
 
     register_dict = {"$s0": 0, "$s1": 1, "$s2": 2, "$s3": 3, "$s4": 4, "$s5": 5,
@@ -15,26 +13,19 @@ def check_branch(register_list,ins):
                      "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13,
                      "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$zero": -1
                      }
-    print(ins)
     temp=ins.split()
     if(len(temp)<2):
         pass
     else:
         branchType=temp[0]
         temp=temp[1].split(',')
-    #     temp=["$s1","$t2","gg"]
-        index=register_dict[temp[0]]
-        if index==-1:
-            a=0
-        else:
-            a=register_list[index]
-        index=register_dict[temp[1]]
-        if index==-1:
-            b=0
-        else:
-            b=register_list[index]
-
-
+        temp[0]=temp[0].strip("$")
+        temp[1]=temp[1].strip("$")
+        
+      
+        a=register_list[temp[0]]
+        b=register_list[temp[1]]
+        
         if branchType == "beq":
             return a==b
         elif branchType == "bne":
@@ -45,15 +36,18 @@ def check_branch(register_list,ins):
 def get_label_num():
     '''
     A function that get number of label
-    '''   
-    label_num = 1
+    '''  
+    argv=sys.argv
+    tran_dict = input.parse_file(argv[1])[1]
+    label_num = len(tran_dict)
     return label_num
 
 def label_position():
     '''
     A function that get label position
     '''
-    a=input.list_labels(input.parse_file("test.txt"))
+    file_name = str(sys.argv[2])
+    a=input.list_labels(input.parse_file(file_name)[0])
     
     return (a[0][1],a[0][0])
 
@@ -89,6 +83,7 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
         
         line_num += 1 #increrment for row
         print(line.rstrip())
+    print()
         
 def print_register(register_list): 
     '''
@@ -101,20 +96,21 @@ def get_ins():
     A function that get all the instrction, and store in a list
     '''
 
-    ins_list = input.parse_file("test.txt")
-
+    ins_list,tran_dict = input.parse_file("test.txt")
+    for x in range(len(ins_list)):
+        if(ins_list[x][0] == "bne") or (ins_list[x][0] == "beq" ):
+            ins_list[x][3]= tran_dict[int(ins_list[x][3])]
+    
     res=[]
     
     for x in ins_list:
         res.append(input.instruction_to_string(x))
-    #print(res)
     return res
 
 def get_register(register_list,ins):    
     '''
     A function that update the register, and store in a list
     '''
-    #TODO
     mint.apply_instruction(ins,register_list)
 
 
@@ -123,11 +119,11 @@ def forward_no_label():
     '''
     A function that do the forwarding with no label
     '''    
+    register_list=mint.menv()
     ins_list = get_ins() #get ins
     ins_num = len(ins_list) #num of ins
     cycle = [] #main double list
     finished_ins = 0 #num of finished ins
-    register_list = [0]*18
     #build the main double list
     for i in range(16): 
         each_ins = [0]*16 
@@ -143,7 +139,7 @@ def forward_no_label():
                 cycle[j][cycle_num - 1] = cycle_num - j 
                 if(cycle_num - j == 5): #WB finished this ins 
                     finished_ins += 1
-                    get_register(register_list,ins_list[cycle_num]) #get register updated
+                    get_register(register_list,instruction_split(ins_list[j])) #get register updated
                                      
         print_cycle(cycle, cycle_num, ins_num, ins_list) #print cycle
         print_register(register_list) #print register
@@ -190,8 +186,8 @@ def forward_with_one_label():
                         finished_ins += 1
                         get_register(register_list,instruction_split(ins_list[j])) #get register updated
         elif(cycle_num == label_to + 5): 
-            #taken = check_branch(register_list,ins_list[label_to])
-            taken = True
+            taken = check_branch(register_list,ins_list[label_to])
+            #taken = True
             if not taken:#if branch is not taken
                 for j in range(ins_num):
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
@@ -230,8 +226,8 @@ def forward_with_one_label():
                         get_register(register_list,instruction_split(ins_list[j])) #get register updated
         elif(cycle_num > label_to + 5)and(taken):
             if(cycle_num == label_to + 5 + 4 + label_to - label_from): 
-                #taken = check_branch(register_list,ins_list[label_to])
-                taken = True                
+                taken = check_branch(register_list,ins_list[label_to])
+                #taken = True                
                 if not taken:#if branch is not taken
                     for j in range(ins_num):
                         if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
