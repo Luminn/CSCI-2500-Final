@@ -112,4 +112,4 @@ def item_to_string(item):
 
 def instruction_to_string(instruction):
     result = ""
-    result += instruction[0] + " " + item_to_string(instruction[1]) + "," + item_to_string(instruction[2])
+    result += instruction[0] + " " + item_to_string(instruction[1]) + "," + item_to_string(instruction[2]):
