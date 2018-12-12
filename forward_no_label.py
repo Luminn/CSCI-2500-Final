@@ -3,7 +3,46 @@ def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
     '''  
-    #TODO
+
+    #ins="bne $s1,$ZERO,gg"
+    #{s0 s1 s2 s3 s4 s5 s6 s7 t0 t1 t2}
+    branchType = ""
+
+    register_dict = {"$s0": 0, "$s1": 1, "$s2": 2, "$s3": 3, "$s4": 4, "$s5": 5,
+                     "$s6": 6, "$s7": 7, "$t0": 8,
+                     "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13,
+                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$ZERO": -1
+                     }
+
+
+
+
+    temp=ins.split()
+    if(temp.length()<2):
+        pass
+    else:
+        branchType=temp[0]
+        temp=temp.split(',')
+    #     temp=["$s1","$t2","gg"]
+        index=register_dict[temp[0]]
+        if index==-1:
+            a=0
+        else:
+            a=register_list[index]
+        index=register_dict[temp[1]]
+        if index==-1:
+            b=0
+        else:
+            b=register_list[index]
+
+
+        if branchType == "beq":
+            return a==b
+        elif branchType == "bne":
+            return a!=b
+
+
+
     return False
 
 def get_label_num():
@@ -17,8 +56,8 @@ def label_position():
     '''
     A function that get label position
     '''   
-    label_from = 2
-    label_to = 5
+    label_from = 1
+    label_to = 4
     return (label_from,label_to)
 
 def print_cycle(cycle, cycle_num, ins_num, ins_list): 
@@ -145,13 +184,20 @@ def forward_with_one_label():
                         register_list = get_register(register_list) #get register updated
             elif(cycle_num == label_from + 4): 
                 taken = check_branch(register_list,ins_num[j])
-                if taken:#if branch is taken
+                if not taken:#if branch is not taken
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                         cycle[j][cycle_num - 1] = cycle_num - j 
                         if(cycle_num - j == 5): #WB finished this ins 
                             finished_ins += 1
                             register_list = get_register(register_list) #get register updated
-                else:#if branch is not taken
+                else:#if branch is taken
+                    ins_num += label_to - label_from
+                    insert_index = label_from
+                    insert_to_index = cycle_num - 1
+                    while insert_index <= label_to:
+                        ins_list.insert(insert_to_index,ins_list[insert_index])
+                        insert_index += 1
+                        insert_to_index +=1
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                         if(cycle_num - j == 5):
                             cycle[j][cycle_num - 1] = 5
@@ -161,25 +207,24 @@ def forward_with_one_label():
                             cycle[j][cycle_num - 1] = 1
                         else:
                             cycle[j][cycle_num - 1] = -1
-            elif(cycle_num>label_from + 4)and(not taken):
-                #todo.....
-                continue
-                
-                
+            elif(cycle_num > label_from + 4)and(not taken):
+                #if branch is not taken
+                if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                    cycle[j][cycle_num - 1] = cycle_num - j 
+                    if(cycle_num - j == 5): #WB finished this ins 
+                        finished_ins += 1
+                        register_list = get_register(register_list) #get register updated
+            elif(cycle_num > label_from + 4)and(taken):
+                #if branch is taken
+                print("not yet")
                 
                 
                     
                     
-                    
-                        
-                    
-                    
-                    
                 
                 
                 
-    
-                
+                   
                     
                                      
         print_cycle(cycle, cycle_num, ins_num, ins_list) #print cycle
