@@ -11,18 +11,18 @@ def check_branch(register_list,ins):
     register_dict = {"$s0": 0, "$s1": 1, "$s2": 2, "$s3": 3, "$s4": 4, "$s5": 5,
                      "$s6": 6, "$s7": 7, "$t0": 8,
                      "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13,
-                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$ZERO": -1
+                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$zero": -1
                      }
 
 
 
 
     temp=ins.split()
-    if(temp.length()<2):
+    if(len(temp)<2):
         pass
     else:
         branchType=temp[0]
-        temp=temp.split(',')
+        temp=temp[1].split(',')
     #     temp=["$s1","$t2","gg"]
         index=register_dict[temp[0]]
         if index==-1:
