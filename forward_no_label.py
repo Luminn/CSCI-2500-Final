@@ -38,7 +38,7 @@ def get_label_num():
     A function that get number of label
     '''  
     argv=sys.argv
-    tran_dict = input.parse_file(argv[1])[1]
+    tran_dict = input.parse_file(argv[2])[1]
     label_num = len(tran_dict)
     return label_num
 
