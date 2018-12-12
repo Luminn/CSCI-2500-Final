@@ -104,12 +104,19 @@ def list_labels(parsed_data):
             result.append([i, int(v[3])])
     return result
 
+
 def item_to_string(item):
     if is_var(item):
         return "$" + item
     else:
         return item
 
+
 def instruction_to_string(instruction):
     result = ""
-    result += instruction[0] + " " + item_to_string(instruction[1]) + "," + item_to_string(instruction[2]):
+    result += instruction[0] + " " + item_to_string(instruction[1]) + "," + item_to_string(instruction[2])
+    if instruction[0] in ("lw", "sw"):
+        result += "(" + item_to_string(instruction[3]) + ")"
+    else:
+        result += "," + item_to_string(instruction[3])
+    return result
