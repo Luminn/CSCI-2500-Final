@@ -1,4 +1,5 @@
-
+import input
+import sys
 def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
@@ -11,18 +12,15 @@ def check_branch(register_list,ins):
     register_dict = {"$s0": 0, "$s1": 1, "$s2": 2, "$s3": 3, "$s4": 4, "$s5": 5,
                      "$s6": 6, "$s7": 7, "$t0": 8,
                      "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13,
-                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$ZERO": -1
+                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$zero": -1
                      }
-
-
-
-
+    print(ins)
     temp=ins.split()
-    if(temp.length()<2):
+    if(len(temp)<2):
         pass
     else:
         branchType=temp[0]
-        temp=temp.split(',')
+        temp=temp[1].split(',')
     #     temp=["$s1","$t2","gg"]
         index=register_dict[temp[0]]
         if index==-1:
@@ -41,24 +39,22 @@ def check_branch(register_list,ins):
         elif branchType == "bne":
             return a!=b
 
-
-
     return False
 
 def get_label_num():
     '''
     A function that get number of label
     '''   
-    label_num = 0
+    label_num = 1
     return label_num
 
 def label_position():
     '''
     A function that get label position
-    '''   
-    label_from = 1
-    label_to = 4
-    return (label_from,label_to)
+    '''
+    a=input.list_labels(input.parse_file("test.txt"))
+    
+    return (a[0][1],a[0][0])
 
 def print_cycle(cycle, cycle_num, ins_num, ins_list): 
     '''
@@ -66,9 +62,11 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
     '''
     print("-"*82)
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
+    ins_list=get_ins()
     line_num = 0 #row num of cycle
     while((line_num < cycle_num) and (line_num < ins_num)): 
         ins_place = 0 #column num of cycle
+        print(len(ins_list),line_num)
         line = ins_list[line_num] + " " * (20 - len(ins_list[line_num]))
         while (ins_place < 16): 
             if(cycle[line_num][ins_place] == 0): 
@@ -110,9 +108,16 @@ def get_ins():
     '''
     A function that get all the instrction, and store in a list
     '''
-    #TODO
-    ins_list = ["$s1,$zero,451", "$t2,$s0,73", "$t4,$s3,$s7"] 
-    return ins_list 
+    # TODO
+
+    ins_list = input.parse_file("test.txt")
+
+    res=[]
+    
+    for x in ins_list:
+        res.append(input.instruction_to_string(x))
+    #print(res)
+    return res
 
 def get_register(register_list):    
     '''
@@ -174,30 +179,33 @@ def forward_with_one_label():
     cycle_num = 1 
     #main loop
     while ((cycle_num < 16) and (finished_ins != ins_num)): 
-        for j in range(ins_num): 
-            if(cycle_num < (label_from + 4)) :
+        if(cycle_num < (label_to + 5)) :
+            for j in range(ins_num):
                 # for the instruction before label
                 if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                     cycle[j][cycle_num - 1] = cycle_num - j 
                     if(cycle_num - j == 5): #WB finished this ins 
                         finished_ins += 1
                         register_list = get_register(register_list) #get register updated
-            elif(cycle_num == label_from + 4): 
-                taken = check_branch(register_list,ins_num[j])
-                if not taken:#if branch is not taken
+        elif(cycle_num == label_to + 5): 
+            #taken = check_branch(register_list,ins_list[label_to])
+            taken = True
+            if not taken:#if branch is not taken
+                for j in range(ins_num):
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                         cycle[j][cycle_num - 1] = cycle_num - j 
                         if(cycle_num - j == 5): #WB finished this ins 
                             finished_ins += 1
                             register_list = get_register(register_list) #get register updated
-                else:#if branch is taken
-                    ins_num += label_to - label_from
-                    insert_index = label_from
-                    insert_to_index = cycle_num - 1
-                    while insert_index <= label_to:
-                        ins_list.insert(insert_to_index,ins_list[insert_index])
-                        insert_index += 1
-                        insert_to_index +=1
+            else:#if branch is taken
+                ins_num += label_to - label_from
+                insert_index = label_from
+                insert_to_index = cycle_num - 1
+                while insert_index <= label_to:
+                    ins_list.insert(insert_to_index,ins_list[insert_index])
+                    insert_index += 1
+                    insert_to_index +=1
+                for j in range(ins_num):
                     if((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                         if(cycle_num - j == 5):
                             cycle[j][cycle_num - 1] = 5
@@ -205,18 +213,36 @@ def forward_with_one_label():
                             register_list = get_register(register_list)
                         elif(cycle_num - j == 1):
                             cycle[j][cycle_num - 1] = 1
+                        elif(cycle_num - j == 0):
+                            cycle[j][cycle_num - 1] = 0                        
                         else:
                             cycle[j][cycle_num - 1] = -1
-            elif(cycle_num > label_from + 4)and(not taken):
-                #if branch is not taken
+
+        elif(cycle_num > label_to + 5)and(not taken):
+            #if branch is not taken
+            for j in range(ins_num):
                 if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
                     cycle[j][cycle_num - 1] = cycle_num - j 
                     if(cycle_num - j == 5): #WB finished this ins 
                         finished_ins += 1
                         register_list = get_register(register_list) #get register updated
-            elif(cycle_num > label_from + 4)and(taken):
-                #if branch is taken
-                print("not yet")
+        elif(cycle_num > label_from + 5)and(taken):
+            #if branch is taken
+            for j in range(ins_num):
+                if ((cycle_num - j) >= 0)and((cycle_num - j) <= 5):
+                    if cycle[j][cycle_num - 2] == -1:
+                        cycle[j][cycle_num - 1] = -1
+                        #print("???????????????????????")
+                        #print("cycle[{}][{}]={}".format(j,(cycle_num - 1),-1))
+                    else:
+                        cycle[j][cycle_num - 1] = cycle_num - j
+                        #print("???????????????????????")
+                        #print("cycle[{}][{}]={}".format(j,(cycle_num - 1),cycle_num - j))
+                        if(cycle_num - j == 5): #WB finished this ins 
+                            finished_ins += 1
+                            register_list = get_register(register_list) #get register updated 
+                
+                
                 
                 
                     
