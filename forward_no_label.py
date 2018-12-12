@@ -1,5 +1,6 @@
 import input
 import sys
+import mint
 def check_branch(register_list,ins):
     '''
     A function that determine if the branch is taken
@@ -62,7 +63,6 @@ def print_cycle(cycle, cycle_num, ins_num, ins_list):
     '''
     print("-"*82)
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
-    ins_list=get_ins()
     line_num = 0 #row num of cycle
     while((line_num < cycle_num) and (line_num < ins_num)): 
         ins_place = 0 #column num of cycle
@@ -94,21 +94,12 @@ def print_register(register_list):
     '''
     A function that do the print register
     '''
-    print("$s0 = {:<14d}$s1 = {:<14d}$s2 = {:<14d}$s3 = {:<14d}".\
-          format(register_list[0],register_list[1],register_list[2],register_list[3]))
-    print("$s4 = {:<14d}$s5 = {:<14d}$s6 = {:<14d}$s7 = {:<14d}".\
-          format(register_list[4],register_list[5],register_list[6],register_list[7]))
-    print("$t0 = {:<14d}$t1 = {:<14d}$t2 = {:<14d}$t3 = {:<14d}".\
-          format(register_list[8],register_list[9],register_list[10],register_list[11]))    
-    print("$t4 = {:<14d}$t5 = {:<14d}$t6 = {:<14d}$t7 = {}".\
-          format(register_list[12],register_list[13],register_list[14],register_list[15]))
-    print("$t8 = {:<14d}$t9 = {:<14d}".format(register_list[16],register_list[17]))
+    print(register_list)
     
 def get_ins():
     '''
     A function that get all the instrction, and store in a list
     '''
-    # TODO
 
     ins_list = input.parse_file("test.txt")
 
@@ -116,16 +107,18 @@ def get_ins():
     
     for x in ins_list:
         res.append(input.instruction_to_string(x))
-    #print(res)
     return res
 
-def get_register(register_list):    
+def get_register(register_list,ins):    
     '''
     A function that update the register, and store in a list
     '''
     #TODO
-    return_list = register_list
-    return return_list
+    print("??????????????????????????????????")
+    print(ins)
+    mint.apply_instruction(ins,register_list)
+
+
 
 def forward_no_label(): 
     '''
@@ -151,7 +144,7 @@ def forward_no_label():
                 cycle[j][cycle_num - 1] = cycle_num - j 
                 if(cycle_num - j == 5): #WB finished this ins 
                     finished_ins += 1
-                    register_list = get_register(register_list) #get register updated
+                    get_register(register_list,ins_list[cycle_num]) #get register updated
                                      
         print_cycle(cycle, cycle_num, ins_num, ins_list) #print cycle
         print_register(register_list) #print register
@@ -159,16 +152,26 @@ def forward_no_label():
     print("-"*82)
     print("END OF SIMULATION")
 
+def instruction_split(ins):
+    res=[0,0,0,0]
+    temp=ins.split()
+    res[0]=temp[0]
+    temp=temp[1].split(",")
+    res[1]=temp[0].strip("$")
+    res[2]=temp[1].strip("$")
+    res[3]=temp[2].strip("$")
+    
+    return res
+
 def forward_with_one_label(): 
     '''
     A function that do the forwarding with label
     '''    
-    #TODO
+    register_list=mint.menv()
     ins_list = get_ins() #get ins
     ins_num = len(ins_list) #num of ins
     cycle = [] #main double list
     finished_ins = 0 #num of finished ins
-    register_list = [0]*18
     label_from,label_to=label_position()
     #build the main double list
     for i in range(16): 
@@ -186,7 +189,7 @@ def forward_with_one_label():
                     cycle[j][cycle_num - 1] = cycle_num - j 
                     if(cycle_num - j == 5): #WB finished this ins 
                         finished_ins += 1
-                        register_list = get_register(register_list) #get register updated
+                        get_register(register_list,instruction_split(ins_list[j])) #get register updated
         elif(cycle_num == label_to + 5): 
             #taken = check_branch(register_list,ins_list[label_to])
             taken = True
@@ -196,7 +199,7 @@ def forward_with_one_label():
                         cycle[j][cycle_num - 1] = cycle_num - j 
                         if(cycle_num - j == 5): #WB finished this ins 
                             finished_ins += 1
-                            register_list = get_register(register_list) #get register updated
+                            get_register(register_list,instruction_split(ins_list[j])) #get register updated
             else:#if branch is taken
                 ins_num += label_to - label_from
                 insert_index = label_from
@@ -210,7 +213,7 @@ def forward_with_one_label():
                         if(cycle_num - j == 5):
                             cycle[j][cycle_num - 1] = 5
                             finished_ins += 1
-                            register_list = get_register(register_list)
+                            get_register(register_list,ins_list[j])
                         elif(cycle_num - j == 1):
                             cycle[j][cycle_num - 1] = 1
                         elif(cycle_num - j == 0):
@@ -225,7 +228,7 @@ def forward_with_one_label():
                     cycle[j][cycle_num - 1] = cycle_num - j 
                     if(cycle_num - j == 5): #WB finished this ins 
                         finished_ins += 1
-                        register_list = get_register(register_list) #get register updated
+                        get_register(register_list,instruction_split(ins_list[j])) #get register updated
         elif(cycle_num > label_from + 5)and(taken):
             #if branch is taken
             for j in range(ins_num):
@@ -240,18 +243,9 @@ def forward_with_one_label():
                         #print("cycle[{}][{}]={}".format(j,(cycle_num - 1),cycle_num - j))
                         if(cycle_num - j == 5): #WB finished this ins 
                             finished_ins += 1
-                            register_list = get_register(register_list) #get register updated 
+                            get_register(register_list,instruction_split(ins_list[j])) #get register updated
                 
-                
-                
-                
-                    
-                    
-                
-                
-                
-                   
-                    
+                        
                                      
         print_cycle(cycle, cycle_num, ins_num, ins_list) #print cycle
         print_register(register_list) #print register
