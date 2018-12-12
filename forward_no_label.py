@@ -6,9 +6,16 @@ def check_branch(register_list,ins):
 
     #ins="bne $s1,$ZERO,gg"
     #{s0 s1 s2 s3 s4 s5 s6 s7 t0 t1 t2}
-
-
     branchType = ""
+
+    register_dict = {"$s0": 0, "$s1": 1, "$s2": 2, "$s3": 3, "$s4": 4, "$s5": 5,
+                     "$s6": 6, "$s7": 7, "$t0": 8,
+                     "$t1": 9, "$t2": 10, "$t3": 11, "$t4": 12, "$t5": 13,
+                     "$t6": 14, "$t7": 15, "$t8": 16, "$t9": 17, "$ZERO": -1
+                     }
+
+
+
 
     temp=ins.split()
     if(temp.length()<2):
@@ -17,8 +24,18 @@ def check_branch(register_list,ins):
         branchType=temp[0]
         temp=temp.split(',')
     #     temp=["$s1","$t2","gg"]
-        a=register_list[temp[0]]
-        b=register_list[temp[1]]
+        index=register_dict[temp[0]]
+        if index==-1:
+            a=0
+        else:
+            a=register_list[index]
+        index=register_dict[temp[1]]
+        if index==-1:
+            b=0
+        else:
+            b=register_list[index]
+
+
         if branchType == "beq":
             return a==b
         elif branchType == "bne":
@@ -94,7 +111,7 @@ def get_ins():
     A function that get all the instrction, and store in a list
     '''
     #TODO
-    ins_list = ["$s1,$zero,451", "$t2,$s0,73", "$t4,$s3,$s7"] 
+    ins_list = ["$s1,$zero,451", "$t2,$s0,73", "beq $t4,$s3,gg"]
     return ins_list 
 
 def get_register(register_list):    
@@ -147,9 +164,7 @@ def forward_with_one_label():
     cycle = [] #main double list
     finished_ins = 0 #num of finished ins
     register_list = [0]*18
-    register_dict = {"$s0":0,"$s1":0,"$s2":0,"$s3":0,"$s4":0,"$s5":0,"$s6":0,"$s7":0,"$t0":0,
-                     "$t1": 0,"$t2":0,"$t3":0,"$t4":0,"$t5":0,"$t6":0,"$t7":0,"$t8":0,"$t9":0
-                     }
+
     label_from,label_to=label_position()
     #build the main double list
     for i in range(16): 
