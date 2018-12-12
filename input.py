@@ -103,3 +103,13 @@ def list_labels(parsed_data):
         if v[0] in ("beq", "bne"):
             result.append([i, int(v[3])])
     return result
+
+def item_to_string(item):
+    if is_var(item):
+        return "$" + item
+    else:
+        return item
+
+def instruction_to_string(instruction):
+    result = ""
+    result += instruction[0] + " " + item_to_string(instruction[1]) + "," + item_to_string(instruction[2])
