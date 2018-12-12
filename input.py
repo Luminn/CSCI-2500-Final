@@ -91,6 +91,25 @@ def parse_file(file_name):
     return result
 
 
+def raw_parse_file(file_name):
+    """Parse a file containing mips code."""
+    result1 = []
+    with open(file_name, "r") as file:
+        data = file.read()
+    last_label = None
+    for line in data.split('\n'):
+        line_data = parse_line(line)
+        # remove lines containing only a label and apply the label to subsequent lines.
+        if line_data[0] is not None:
+            if line_data[1] is None and last_label is not None:
+                line_data = line_data[0], last_label
+            result1.append(line_data)
+            last_label = None
+        elif line_data[0] is None and line_data[1] is not None:
+            last_label = line_data[1]
+    return result1
+
+
 def is_var(item):
     """Returns true a string represents a variable."""
     return item[0].isalpha()
