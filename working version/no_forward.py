@@ -22,7 +22,59 @@ def noforwarding_print_cycle(cycle, cycle_num, ins_num, ins_list, real_nop):
     print("-"*82)
     print("CPU Cycles ===>     1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16") 
     line_num = 0 #row num of cycle
-    while((line_num < cycle_num+1) and (line_num < ins_num)): 
+    while((line_num < cycle_num+1) and (line_num < ins_num)):
+        if real_nop[line_num] != 0 and cycle[line_num][cycle[line_num].index(2)+1] == 2:
+            line = "nop" + " "* 17
+            ins_place = 0
+            star = 3
+            while (ins_place < 16): 
+                if (star == 0):
+                    line += ".   "
+                elif(cycle[line_num][ins_place] == 0): 
+                    line += ".   " 
+                elif(cycle[line_num][ins_place] == 1): 
+                    line += "IF  " 
+                elif(cycle[line_num][ins_place] == 2 and cycle[line_num][ins_place-1] == 1): 
+                    line += "ID  " 
+                elif(cycle[line_num][ins_place] == 2 and cycle[line_num][ins_place-1] == 2 and star > 0): 
+                    line += "*   " 
+                    star -=1
+                elif(cycle[line_num][ins_place] == 3 and star > 0): 
+                    line += "*   " 
+                    star -=1
+                elif(cycle[line_num][ins_place] == 4 and star > 0): 
+                    line += "*   " 
+                    star -=1
+                elif(cycle[line_num][ins_place] == 5): 
+                    line += ".   " 
+                ins_place += 1
+            print(line.rstrip())
+            if real_nop[line_num] == 2:
+                star = 3
+                line = "nop" + " "* 17
+                ins_place = 0
+                while (ins_place < 16): 
+                    if (star == 0):
+                        line += ".   "
+                    elif(cycle[line_num][ins_place] == 0): 
+                        line += ".   " 
+                    elif(cycle[line_num][ins_place] == 1): 
+                        line += "IF  " 
+                    elif(cycle[line_num][ins_place] == 2 and cycle[line_num][ins_place-1] == 1): 
+                        line += "ID  " 
+                    elif(cycle[line_num][ins_place] == 2 and cycle[line_num][ins_place-1] == 2 and star > 0): 
+                        line += "*   " 
+                        star -=1
+                    elif(cycle[line_num][ins_place] == 3 and star > 0): 
+                        line += "*   " 
+                        star -=1
+                    elif(cycle[line_num][ins_place] == 4 and star > 0): 
+                        line += "*   " 
+                        star -=1
+                    elif(cycle[line_num][ins_place] == 5): 
+                        line += ".   " 
+                    ins_place += 1
+                print(line.rstrip())
         ins_place = 0 #column num of cycle
         #print(len(ins_list),line_num)
         line = ins_list[line_num] + " " * (20 - len(ins_list[line_num]))
@@ -107,7 +159,9 @@ def no_forward(filename, _list):
     for k in range(len(s_l)):
         for j in range(len(f_l)):
             if j < k and j>k-3 and (f_l[j] == s_l[k][0] or f_l[j] == s_l[k][1]):
-                if (nop[k] < k - j):
+                if (nop[k] == 0):
+                    nop[k] = k - j
+                elif nop[k] > k - j:
                     nop[k] = k - j
     
     temp = 0
@@ -117,34 +171,71 @@ def no_forward(filename, _list):
     i = 0
     while i < 16:
 
-        if (temp!=0 and i - temp == 3):
+        if (temp!=0 and i - temp == 3 and real_nop[temp] == 1):
             t = total_list[temp].index(1)
             total_list[temp][t+real_nop[temp]+2] = 3
 
-        if (temp!=0 and i - temp == 4):
+        if (temp!=0 and i - temp == 4 and real_nop[temp] == 1):
             t = total_list[temp].index(1)
             total_list[temp][t+real_nop[temp]+3] = 4
 
-        if (temp!=0 and i - temp == 5):
+        if (temp!=0 and i - temp == 5 and real_nop[temp] == 1):
             t = total_list[temp].index(1)
-            total_list[temp][t+real_nop[temp-1]+4] = 5
+            total_list[temp][t+real_nop[temp]+4] = 5
 
-        if (i_f!=0 and i - i_f == 2):
+        if (temp!=0 and i - temp == 3 and real_nop[temp] == 2):
             t = total_list[temp].index(1)
-            total_list[i_f][t+real_nop[i_f-1]+2] = 2
+            total_list[temp][t+real_nop[temp]+1] = 2
 
-        if (i_f!=0 and i - i_f == 3):
+        if (temp!=0 and i - temp == 4 and real_nop[temp] == 2):
             t = total_list[temp].index(1)
-            total_list[i_f][t+real_nop[i_f-1]+3] = 3
+            total_list[temp][t+real_nop[temp]+2] = 3
 
-        if (i_f!=0 and i - i_f == 4):
+        if (temp!=0 and i - temp == 5 and real_nop[temp] == 2):
             t = total_list[temp].index(1)
-            total_list[i_f][t+real_nop[i_f-1]+4] = 4
+            total_list[temp][t+real_nop[temp]+3] = 4
 
-        if (i_f!=0 and i - i_f == 5):
+        if (temp!=0 and i - temp == 6 and real_nop[temp] == 2):
             t = total_list[temp].index(1)
-            total_list[i_f][t+real_nop[i_f-1]+5] = 5
+            total_list[temp][t+real_nop[temp]+4] = 5
 
+
+        if (i_f!=0 and i - i_f == 2 and real_nop[i_f-1] == 1):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+1] = 2
+
+        if (i_f!=0 and i - i_f == 3 and real_nop[i_f-1] == 1):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+2] = 3
+
+        if (i_f!=0 and i - i_f == 4 and real_nop[i_f-1] == 1):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+3] = 4
+
+        if (i_f!=0 and i - i_f == 5 and real_nop[i_f-1] == 1):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+4] = 5
+
+
+        if (i_f!=0 and i - i_f == 2 and real_nop[i_f-1] == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]] = 1
+            
+        if (i_f!=0 and i - i_f == 3 and real_nop[i_f-1] == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+1] = 2
+
+        if (i_f!=0 and i - i_f == 4 and real_nop[i_f-1] == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+2] = 3
+
+        if (i_f!=0 and i - i_f == 5 and real_nop[i_f-1] == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+3] = 4
+
+        if (i_f!=0 and i - i_f == 6 and real_nop[i_f-1] == 2):
+            t = total_list[i_f].index(1)
+            total_list[i_f][t+real_nop[i_f-1]+4] = 5
         #print(real_nop)
 
         #WB
@@ -223,3 +314,6 @@ def no_forward(filename, _list):
         i+=1
 
     return total_list
+
+#no_forward("p1-input03.txt", [["ori","s1", "zero", "451"], ["addi", "t2", "s0", "73"], ["add", "t4", "s1", "s7"]])
+#no_forward("p1-input03.txt", [["ori","s1", "s0", "63"], ["ori", "s2", "s0", "65"], ["and", "t2", "s1", "s2"], ["addi", "s1", "s1", "1"]])
